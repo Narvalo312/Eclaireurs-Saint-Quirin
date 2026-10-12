@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classement des patrouilles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Rokkitt:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  /* Les trois premières couleurs sont reprises de config.js au chargement. */
+  :root {
+    color-scheme: light;
+    --principale: #7b1e2e;
+    --secondaire: #5d6166;
+    --fond: #efeeeb;
+    --papier: #fbfaf8;
+    --encre: #26282b;
+    --discret: #7c8085;
+    --trait: #d5d3ce;
+    --monte: #3d7a4f;
+    --titre: "Rokkitt", Rockwell, Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--encre);
+    font: 16px/1.45 "Barlow", system-ui, sans-serif;
+    /* quadrillage de carnet */
+    background-color: var(--fond);
+    background-image:
+      linear-gradient(rgba(0, 0, 0, .035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, .035) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* En-tête : la pointe d'un foulard, bordé de la couleur secondaire */
+  .foulard { background: var(--secondaire); padding-bottom: 9px; }
+  .foulard, .foulard .tissu { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 44px), 50% 100%, 0 calc(100% - 44px)); }
+  .foulard .tissu { background: var(--principale); color: #fff; text-align: center; padding: 30px 20px 74px; }
+  /* Logo de l'unité dans un médaillon clair, pour rester lisible sur la couleur du foulard */
+  .medaillon[hidden] { display: none; }
+  .medaillon {
+    width: 132px; height: 132px; margin: 0 auto 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: #fff; border: 4px solid var(--secondaire);
+  }
+  .medaillon img { max-width: 70%; max-height: 76%; }
+  h1 {
+    margin: 0; font: 800 clamp(1.9rem, 7.5vw, 3rem)/.95 var(--titre);
+    text-transform: uppercase; letter-spacing: .02em;
+  }
+  .foulard p {
+    margin: 12px 0 0; font-weight: 600; font-size: .8rem;
+    text-transform: uppercase; letter-spacing: .28em; opacity: .8;
+  }
+
+  main { max-width: 700px; margin: 0 auto; padding: 8px 16px 48px; }
+
+  /* Titres de section en ruban */
+  h2 {
+    display: inline-block; margin: 40px 0 16px -16px; padding: 5px 30px 3px 16px;
+    background: var(--secondaire); color: #fff;
+    font: 600 1.15rem/1.3 var(--titre); text-transform: uppercase; letter-spacing: .1em;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%);
+  }
+  .fiche { background: var(--papier); border: 1.5px solid var(--secondaire); border-radius: 3px; }
+  .avis { padding: 10px 14px; margin-top: 24px; font-size: .9rem; border-style: dashed; }
+  .avis.erreur { border-color: var(--principale); color: var(--principale); }
+
+  /* Podium */
+  .podium { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: end; gap: 6px; margin-top: 28px; }
+  .marche { text-align: center; min-width: 0; }
+  .marche .embleme { height: 54px; }
+  .marche .embleme svg, .marche .embleme img { height: 100%; width: auto; }
+  .marche .nom { font: 800 clamp(1rem, 4.6vw, 1.45rem)/1.05 var(--titre); overflow-wrap: anywhere; margin-top: 4px; }
+  .marche .pts { font-weight: 600; color: var(--discret); margin-bottom: 8px; }
+  .marche .pts b { color: var(--encre); font: 800 1.35rem/1 var(--titre); }
+  .socle {
+    display: flex; align-items: flex-start; justify-content: center; padding-top: 6px;
+    color: #fff; font: 800 3rem/1 var(--titre); background: var(--secondaire);
+    border-radius: 3px 3px 0 0;
+  }
+  .rang-1 .socle { height: 132px; background: var(--principale); font-size: 4.2rem; }
+  .rang-2 .socle { height: 94px; }
+  .rang-3 .socle { height: 66px; opacity: .72; }
+  .podium + .fiche { border-top-width: 4px; border-radius: 0 0 3px 3px; }
+
+  /* Tableaux */
+  .defile { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 9px 8px; text-align: right; white-space: nowrap; }
+  tr + tr td { border-top: 1px solid var(--trait); }
+  th {
+    font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--discret); border-bottom: 1.5px solid var(--secondaire);
+  }
+  th:first-child, td:first-child { padding-left: 14px; text-align: center; width: 1%; }
+  th:last-child, td:last-child { padding-right: 14px; }
+  th:nth-child(2), td:nth-child(2) { text-align: left; white-space: normal; }
+  td:first-child { font: 800 1.3rem/1 var(--titre); color: var(--secondaire); }
+  td:last-child { font: 800 1.3rem/1 var(--titre); color: var(--principale); }
+  .patrouille { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .patrouille svg, .patrouille img { height: 22px; width: auto; flex: none; }
+  .ecart { font-size: .75rem; font-weight: 600; white-space: nowrap; color: var(--principale); }
+  .ecart.monte { color: var(--monte); }
+
+  @media (max-width: 480px) {
+    th, td { padding: 9px 5px; }
+    th { letter-spacing: .04em; }
+    th:first-child, td:first-child { padding-left: 10px; }
+    th:last-child, td:last-child { padding-right: 10px; }
+    .patrouille { gap: 6px; }
+    .patrouille svg, .patrouille img { height: 18px; }
+  }
+
+  /* Graphique */
+  .courbes { padding: 14px 10px 6px; }
+  .courbes svg { display: block; width: 100%; height: auto; }
+  .courbes text { fill: var(--discret); font-size: 11px; }
+  .courbes .repere { stroke: var(--trait); stroke-width: 1; }
+  .legende { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: center; padding: 8px 6px 6px; font-size: .85rem; font-weight: 500; }
+  .legende i { display: inline-block; width: 16px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+  /* Samedis */
+  details { margin-bottom: 10px; overflow: hidden; }
+  summary { display: flex; align-items: stretch; cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  .jour {
+    flex: none; width: 64px; padding: 8px 0 6px; text-align: center;
+    background: var(--principale); color: #fff;
+  }
+  .jour b { display: block; font: 800 1.9rem/.9 var(--titre); }
+  .jour span { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; }
+  .resume { flex: 1; min-width: 0; padding: 8px 12px; align-self: center; }
+  .resume b { display: block; font: 600 1.2rem/1.15 var(--titre); }
+  .mult {
+    font: 600 .8rem/1 "Barlow", sans-serif; font-style: normal; white-space: nowrap; vertical-align: middle;
+    padding: 2px 7px; border-radius: 3px; background: var(--principale); color: #fff;
+  }
+  .resume span { font-size: .85rem; color: var(--discret); }
+  summary::after {
+    content: ""; flex: none; align-self: center; margin-right: 16px; width: 9px; height: 9px;
+    border-right: 2px solid var(--secondaire); border-bottom: 2px solid var(--secondaire);
+    transform: rotate(45deg); transition: transform .15s;
+  }
+  details[open] summary::after { transform: rotate(-135deg); }
+  details[open] summary { border-bottom: 1.5px solid var(--secondaire); }
+
+  footer { margin-top: 36px; padding-top: 14px; border-top: 1.5px dashed var(--secondaire); text-align: center; color: var(--discret); font-size: .85rem; }
+  footer img { display: block; height: 58px; width: auto; margin: 4px auto 0; }
+  footer b { font-weight: 600; color: var(--encre); text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; }
+</style>
+</head>
+<body>
+<header class="foulard">
+  <div class="tissu">
+    <div class="medaillon" id="medaillon" hidden><img id="logo" alt=""></div>
+    <h1 id="titre"></h1>
+    <p id="sous-titre"></p>
+  </div>
+</header>
+<main>
+  <div id="app"><p style="text-align:center;color:var(--discret);margin-top:32px">Chargement…</p></div>
+  <footer id="pied" hidden></footer>
+</main>
+
+<script src="config.js"></script>
+<script>
+const C = window.CONFIG;
+// Couleurs attribuées aux patrouilles qui n'en ont pas dans config.js.
+const PALETTE = ["#c9772b", "#2f6f5e", "#2d5f8a", "#c9a227", "#6d4a8c", "#3f8f9c", "#a2572f", "#7b8f3a"];
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const num = s => { const n = parseFloat(String(s).replace(",", ".")); return isNaN(n) ? 0 : n; };
+const fmt = n => String(Math.round(n * 100) / 100).replace(".", ",");
+
+function parseCSV(t) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) {
+      if (c === '"') { if (t[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== "\r") cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+async function charger() {
+  const url = C.sheetId
+    ? `https://docs.google.com/spreadsheets/d/${C.sheetId}/gviz/tq?tqx=out:csv&headers=1${C.onglet ? `&sheet=${encodeURIComponent(C.onglet)}` : ""}`
+    : "modele/classement.csv";
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return parseCSV(await r.text());
+}
+
+// Lit la feuille. À gauche, une ligne par jeu : date, nom, multiplicateur. À droite, sous
+// l'en-tête « Date », un bloc « Jeu / Présences / Total cumulé » par jeu, dans le même ordre,
+// avec une colonne par patrouille. Les points affichés sont ceux calculés par la feuille.
+function lireFeuille(rows) {
+  const titres = rows[0] || [];
+  const head = titres.map(norm);
+  const iMult = head.findIndex(h => h.startsWith("multiplicateur"));
+  const iBloc = head.findIndex((h, i) => i > iMult && h === "date");
+  if (iMult < 0 || iBloc < 0) return null;
+  const patrouilles = [];
+  for (let i = iBloc + 1; i < titres.length; i++) if (titres[i].trim()) patrouilles.push({ nom: titres[i].trim(), col: i });
+
+  const corps = rows.slice(1);
+  const cell = (r, i) => (i < 0 ? "" : (r?.[i] ?? "").trim());
+  const etiquette = r => norm(cell(r, iBloc));
+  const blocs = [];
+  corps.forEach((r, n) => {
+    if (etiquette(r).startsWith("jeu"))
+      blocs.push({ jeu: r, presences: corps.slice(n + 1, n + 3).find(x => etiquette(x).startsWith("presence")) });
+  });
+
+  const samedis = [];
+  corps.forEach((r, n) => {
+    const brut = cell(r, iMult - 2), jeu = cell(r, iMult - 1), bloc = blocs[n];
+    if ((!brut && !jeu) || !bloc) return;
+    const valeurs = patrouilles.map(p => [cell(bloc.jeu, p.col), cell(bloc.presences, p.col)]);
+    if (valeurs.every(v => v[0] === "" && v[1] === "")) return; // jeu pas encore joué
+    const lignes = patrouilles.map((p, i) => {
+      const points = num(valeurs[i][0]), presence = num(valeurs[i][1]);
+      return { patrouille: p.nom, jeu: points, presence, total: points + presence, position: null };
+    });
+    // La position au jeu se déduit des points de jeu, ex æquo compris.
+    const tri = lignes.filter(l => l.jeu > 0).sort((a, b) => b.jeu - a.jeu);
+    tri.forEach((l, i) => l.position = i > 0 && tri[i - 1].jeu === l.jeu ? tri[i - 1].position : i + 1);
+    const mult = cell(r, iMult);
+    samedis.push({ date: parseDate(brut), brut, jeu, multiplicateur: mult === "" ? 1 : num(mult), ordre: n, lignes });
+  });
+  return { samedis, patrouilles: patrouilles.map(p => p.nom) };
+}
+
+function parseDate(s) {
+  let m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+  if (m) return new Date(m[3].length === 2 ? 2000 + +m[3] : +m[3], m[2] - 1, +m[1]);
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return new Date(+m[1], m[2] - 1, +m[3]);
+  return null;
+}
+
+// Rang avec ex æquo : même total = même rang.
+function rangs(totaux) {
+  const tri = [...totaux.entries()].sort((a, b) => b[1] - a[1]);
+  const out = new Map();
+  tri.forEach(([nom, t], i) => out.set(nom, i > 0 && tri[i - 1][1] === t ? out.get(tri[i - 1][0]) : i + 1));
+  return out;
+}
+
+function calculer({ samedis, patrouilles }) {
+  const liste = [...samedis].sort((a, b) => (a.date && b.date) ? a.date - b.date || a.ordre - b.ordre : a.ordre - b.ordre);
+  const noms = [...patrouilles].sort((a, b) => a.localeCompare(b, "fr"));
+  const reglages = C.patrouilles || {};
+  const couleur = Object.fromEntries(noms.map((n, i) => [n, reglages[n]?.couleur || PALETTE[i % PALETTE.length]]));
+
+  const stats = new Map(noms.map(n => [n, { nom: n, total: 0, jeu: 0, presence: 0, victoires: 0, cumul: [] }]));
+  let avant = null;
+  liste.forEach((s, i) => {
+    if (i === liste.length - 1 && i > 0) avant = rangs(new Map(noms.map(n => [n, stats.get(n).total])));
+    for (const l of s.lignes) {
+      const p = stats.get(l.patrouille);
+      p.total += l.total; p.jeu += l.jeu; p.presence += l.presence;
+      if (l.position === 1) p.victoires++;
+    }
+    for (const p of stats.values()) p.cumul.push(p.total);
+  });
+  const maintenant = rangs(new Map(noms.map(n => [n, stats.get(n).total])));
+  const classement = [...stats.values()].sort((a, b) => b.total - a.total || a.nom.localeCompare(b.nom, "fr"));
+  for (const p of classement) {
+    p.rang = maintenant.get(p.nom);
+    p.delta = avant ? avant.get(p.nom) - p.rang : 0;
+  }
+  return { liste, classement, couleur };
+}
+
+// Logo de la patrouille s'il est réglé dans config.js, sinon un fanion à sa couleur.
+function embleme(nom, couleur) {
+  const logo = C.patrouilles?.[nom]?.logo;
+  if (logo) return `<img src="${esc(logo)}" alt="">`;
+  return `<svg viewBox="0 0 44 48" aria-hidden="true"><rect x="5" y="2" width="3.5" height="44" rx="1.75" fill="var(--secondaire)"/><path d="M8.5 5 42 15.5 8.5 26Z" fill="${couleur[nom]}"/></svg>`;
+}
+
+function htmlPodium({ classement, couleur }) {
+  const top = classement.slice(0, 3);
+  const ordre = top.length === 3 ? [top[1], top[0], top[2]] : top;
+  return `<div class="podium">${ordre.map(p => `
+    <div class="marche rang-${p.rang}">
+      <div class="embleme">${embleme(p.nom, couleur)}</div>
+      <div class="nom">${esc(p.nom)}</div>
+      <div class="pts"><b>${fmt(p.total)}</b> pts</div>
+      <div class="socle">${p.rang}</div>
+    </div>`).join("")}</div>`;
+}
+
+function htmlClassement({ classement, couleur }) {
+  return `<div class="fiche defile"><table>
+    <tr><th></th><th>Patrouille</th><th>Jeux</th><th>Prés.</th><th>Total</th></tr>
+    ${classement.map(p => {
+      const ecart = p.delta > 0 ? `<span class="ecart monte">▲ ${p.delta}</span>`
+        : p.delta < 0 ? `<span class="ecart">▼ ${-p.delta}</span>` : "";
+      return `<tr>
+        <td>${p.rang}</td>
+        <td><span class="patrouille">${embleme(p.nom, couleur)}${esc(p.nom)}${ecart}</span></td>
+        <td>${fmt(p.jeu)}</td><td>${fmt(p.presence)}</td>
+        <td>${fmt(p.total)}</td>
+      </tr>`;
+    }).join("")}
+  </table></div>`;
+}
+
+function htmlGraphique({ liste, classement, couleur }) {
+  if (liste.length < 2) return "";
+  const W = 640, H = 280, L = 34, R = 14, T = 12, B = 26;
+  const max = Math.max(1, ...classement.map(p => p.total));
+  const pas = Math.max(1, Math.ceil(max / 4 / 5) * 5);
+  const haut = Math.ceil(max / pas) * pas;
+  const x = i => L + (W - L - R) * i / (liste.length - 1);
+  const y = v => T + (H - T - B) * (1 - v / haut);
+  let g = "";
+  for (let v = 0; v <= haut; v += pas)
+    g += `<line class="repere" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  const saut = Math.ceil(liste.length / 8);
+  liste.forEach((s, i) => {
+    if (i % saut === 0 || i === liste.length - 1)
+      g += `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === liste.length - 1 ? "end" : "middle"}">${esc(dateCourte(s))}</text>`;
+  });
+  for (const p of [...classement].reverse()) {
+    const points = p.cumul.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    g += `<polyline points="${points}" fill="none" stroke="${couleur[p.nom]}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    g += `<circle cx="${x(liste.length - 1)}" cy="${y(p.total)}" r="4.5" fill="${couleur[p.nom]}"/>`;
+  }
+  const legende = classement.map(p => `<span><i style="background:${couleur[p.nom]}"></i>${esc(p.nom)}</span>`).join("");
+  return `<h2>Évolution</h2><div class="fiche courbes">
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution des points cumulés par patrouille">${g}</svg>
+    <div class="legende">${legende}</div>
+  </div>`;
+}
+
+const dateCourte = s => s.date ? s.date.toLocaleDateString("fr-FR", { day: "numeric", month: "numeric" }) : s.brut;
+
+function htmlSamedis({ liste, couleur }) {
+  return `<h2>Samedi par samedi</h2>` + [...liste].reverse().map((s, i) => {
+    const lignes = [...s.lignes].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+    const gagnants = lignes.filter(l => l.position === 1).map(l => l.patrouille);
+    const jour = s.date
+      ? `<b>${s.date.getDate()}</b><span>${esc(s.date.toLocaleDateString("fr-FR", { month: "short" }).replace(".", ""))}</span>`
+      : `<span>${esc(s.brut)}</span>`;
+    return `<details class="fiche"${i === 0 ? " open" : ""}>
+      <summary>
+        <div class="jour">${jour}</div>
+        <div class="resume"><b>${esc(s.jeu || "Jeu")}${s.multiplicateur !== 1 ? ` <i class="mult">×${fmt(s.multiplicateur)}</i>` : ""}</b>${gagnants.length ? `<span>Victoire : ${esc(gagnants.join(", "))}</span>` : ""}</div>
+      </summary>
+      <div class="defile"><table>
+        <tr><th></th><th>Patrouille</th><th>Jeu</th><th>Prés.</th><th>Total</th></tr>
+        ${lignes.map(l => `<tr>
+          <td>${l.position ?? "–"}</td>
+          <td><span class="patrouille">${embleme(l.patrouille, couleur)}${esc(l.patrouille)}</span></td>
+          <td>${fmt(l.jeu)}</td><td>${fmt(l.presence)}</td>
+          <td>${fmt(l.total)}</td>
+        </tr>`).join("")}
+      </table></div>
+    </details>`;
+  }).join("");
+}
+
+async function main() {
+  const racine = document.documentElement.style;
+  for (const [cle, valeur] of Object.entries(C.couleurs || {})) if (valeur) racine.setProperty(`--${cle}`, valeur);
+  document.title = C.titre;
+  document.getElementById("titre").textContent = C.titre;
+  document.getElementById("sous-titre").textContent = C.sousTitre;
+  if (C.logo) { document.getElementById("logo").src = C.logo; document.getElementById("medaillon").hidden = false; }
+  const app = document.getElementById("app");
+
+  let feuille;
+  try {
+    feuille = lireFeuille(await charger());
+  } catch (e) {
+    app.innerHTML = `<div class="fiche avis erreur">Impossible de lire la feuille de calcul. Vérifiez qu'elle est partagée en lecture à « Tous les utilisateurs disposant du lien ».</div>`;
+    return;
+  }
+  if (!feuille || !feuille.patrouilles.length) {
+    app.innerHTML = `<div class="fiche avis erreur">La feuille n'a pas la forme attendue : une colonne « Multiplicateur » à gauche, puis à droite une colonne « Date » suivie d'une colonne par patrouille.</div>`;
+    return;
+  }
+
+  const data = calculer(feuille);
+  if (!data.liste.length) {
+    app.innerHTML = `<div class="fiche avis">Aucun résultat pour l'instant. Rendez-vous après le premier jeu !</div>`;
+    return;
+  }
+  app.innerHTML =
+    (C.sheetId ? "" : `<div class="fiche avis">Données d'exemple : renseignez <code>sheetId</code> dans <code>config.js</code> pour brancher votre Google Sheet.</div>`) +
+    htmlPodium(data) + htmlClassement(data) + htmlGraphique(data) + htmlSamedis(data);
+
+  const pied = document.getElementById("pied");
+  if (!C.logoPied) return;
+  pied.innerHTML = `<img src="${esc(C.logoPied)}" alt="">`;
+  pied.hidden = false;
+}
+main();
+</script>
+</body>
+</html>

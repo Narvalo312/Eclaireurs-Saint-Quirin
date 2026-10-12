@@ -1,0 +1,30 @@
+// Réglages du site. C'est le seul fichier à modifier.
+window.CONFIG = {
+  titre: "Classement des patrouilles",
+  sousTitre: "Année 2026-2027",
+
+  // Couleurs de l'unité.
+  couleurs: {
+    principale: "#7b1e2e", // bordeaux
+    secondaire: "#5d6166", // gris
+    fond: "#efeeeb",       // gris clair du fond de page
+  },
+
+  // Logo affiché dans l'en-tête et logo affiché en bas de page. Vide = pas de logo.
+  logo: "images/eclaireurs.png",
+  logoPied: "images/scoutisme-mondial.png",
+
+  // Couleur et logo de chaque patrouille (facultatif). Le nom doit être écrit
+  // exactement comme dans le Google Sheet. Sans réglage, une couleur est attribuée
+  // automatiquement et un fanion est dessiné.
+  patrouilles: {
+    // "Aigles": { couleur: "#c9772b", logo: "images/aigles.png" },
+  },
+
+  // Identifiant du Google Sheet : la partie entre /d/ et /edit dans son adresse.
+  // Tant qu'il est vide, le site affiche les données d'exemple du dossier modele/.
+  sheetId: "",
+
+  // Nom de l'onglet à lire. Vide = le premier onglet du tableau.
+  onglet: "",
+};
