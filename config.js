@@ -1,6 +1,6 @@
 // Réglages du site. C'est le seul fichier à modifier.
 window.CONFIG = {
-  titre: "Classement des patrouilles",
+  titre: "Eclaireurs-Saint-Quirin",
   sousTitre: "Année 2026-2027",
 
   // Couleurs de l'unité.
@@ -23,7 +23,7 @@ window.CONFIG = {
 
   // Identifiant du Google Sheet : la partie entre /d/ et /edit dans son adresse.
   // Tant qu'il est vide, le site affiche les données d'exemple du dossier modele/.
-  sheetId: "",
+  sheetId: "1iFtfsYzccsoCJKrBJG6v42VSMQlk-s_8QZ9JuqqK2ak",
 
   // Nom de l'onglet à lire. Vide = le premier onglet du tableau.
   onglet: "",
