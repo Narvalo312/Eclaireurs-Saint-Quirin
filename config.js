@@ -18,7 +18,8 @@ window.CONFIG = {
   // exactement comme dans le Google Sheet. Sans réglage, une couleur est attribuée
   // automatiquement et un fanion est dessiné.
   patrouilles: {
-    // "Aigles": { couleur: "#c9772b", logo: "images/aigles.png" },
+    "Cobras": { couleur: "#c9772b", logo: "gettyimages-913059310-612x612.jpg" },
+    
   },
 
   // Identifiant du Google Sheet : la partie entre /d/ et /edit dans son adresse.
