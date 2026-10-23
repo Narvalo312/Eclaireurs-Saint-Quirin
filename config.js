@@ -18,8 +18,8 @@ window.CONFIG = {
   // exactement comme dans le Google Sheet. Sans réglage, une couleur est attribuée
   // automatiquement et un fanion est dessiné.
   patrouilles: {
-    "Cobras": { couleur: "#c9772b", logo: "images/360_F_2122129890_tqKjRPWrsinfLhUULierLTT58hm6qdwQ.jpg" },
-    "Lions": { couleur: "#c9772b", logo: "images/gettyimages-913059310-612x612.jpg" },
+    //"Cobras": { couleur: "#c9772b", logo: "images/360_F_2122129890_tqKjRPWrsinfLhUULierLTT58hm6qdwQ.jpg" },
+    //"Lions": { couleur: "#c9772b", logo: "images/gettyimages-913059310-612x612.jpg" },
     
   },
 
